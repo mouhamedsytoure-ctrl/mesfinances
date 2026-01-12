@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  app:
+    image: laravelphp/php-fpm:8.2
+    container_name: mesfinances_app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - mesfinances-net
+  web:
+    image: nginx:stable-alpine
+    container_name: mesfinances_web
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+    networks:
+      - mesfinances-net
+  mysql:
+    image: mysql:8.0
+    container_name: mesfinances_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: mesfinances
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - mesfinances-net
+
+volumes:
+  dbdata:
+
+networks:
+  mesfinances-net:
+    driver: bridge
